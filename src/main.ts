@@ -11,14 +11,14 @@ async function run(): Promise<void> {
       ctx = github.context,
       ownerRepo = `${ctx.repo.owner}/${ctx.repo.repo}`,
       repoURL = `https://github.com/${ownerRepo}`,
-      actionURL = `${repoURL}/actions`,
-      commitURL = `${repoURL}/commit/${ctx.sha}`
+      actionURL = `${repoURL}/actions`
 
     // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
     core.debug(`Got command: ${cmd}`)
 
-    let refType: 'branch' | 'tag' | 'pull' | undefined
-    let pullURL: string | undefined
+    let commitURL = `${repoURL}/commit/${ctx.sha}`,
+      refType: 'branch' | 'tag' | 'pull' | undefined,
+      pullURL: string | undefined
     if (ctx.ref.startsWith('refs/heads/')) {
       refType = 'branch'
     } else if (ctx.ref.startsWith('refs/tags/')) {
@@ -28,13 +28,14 @@ async function run(): Promise<void> {
       const regex = new RegExp(`^refs/pull/(.+)/merge$`)
       const matches = 'refs/pull/11/merge'.match(regex)
       pullURL = `${repoURL}/pull/${matches?.at(1)}`
+      commitURL = `${commitURL}/commits/${ctx.sha}`
     }
 
     let ciInfo = `[CI](${actionURL}) of ${ownerRepo}/${ctx.ref}, see).`
     if (refType === 'pull') {
       ciInfo = ciInfo.concat(` [PR](${pullURL}),`)
     }
-    ciInfo = ciInfo.concat(` [commit](${commitURL}.`)
+    ciInfo = ciInfo.concat(` [commit](${commitURL}).`)
 
     let cmdInfo: string, tpl: lark.CardTemplate
     try {

@@ -19,12 +19,12 @@ class Message {
     this.type = type
   }
 
-  setCard(c: Card) {
+  setCard(c: Card): this {
     this.card = c
     return this
   }
 
-  toJSON() {
+  toJSON(): object {
     return {
       msg_type: this.type,
       card: this.card?.render()
@@ -33,7 +33,7 @@ class Message {
 }
 
 interface Element {
-  render(): any
+  render(): object
 }
 
 export class Markdown implements Element {
@@ -43,7 +43,7 @@ export class Markdown implements Element {
     this.content = content
   }
 
-  render() {
+  render(): object {
     return {
       tag: 'markdown',
       content: this.content
@@ -58,7 +58,7 @@ export class Text implements Element {
     this.content = content
   }
 
-  render() {
+  render(): object {
     return {
       tag: 'div',
       text: {
@@ -78,7 +78,7 @@ class CardHeader {
     this.title = title
   }
 
-  render() {
+  render(): object {
     return {
       template: this.template,
       title: {
@@ -95,14 +95,15 @@ export class Card {
 
   constructor(template: CardTemplate, title: string) {
     this.header = new CardHeader(template, title)
-    this.elements = new Array()
+    this.elements = []
   }
 
-  addElements(...e: Element[]) {
+  addElements(...e: Element[]): this {
     this.elements.push(...e)
+    return this
   }
 
-  render() {
+  render(): object {
     return {
       header: this.header?.render(),
       elements: this.elements.map(x => x.render())
@@ -114,14 +115,14 @@ export class Card {
   }
 }
 
-export async function send(webhook: string, data: any): Promise<void> {
+export async function send(webhook: string, msg: Message): Promise<void> {
   return new Promise(function (resolve, reject) {
     const req = request(webhook, {method: 'POST'}, resp => {
       if (!resp.statusCode || resp.statusCode < 200 || resp.statusCode >= 300) {
-        return reject(new Error('statusCode=' + resp.statusCode))
+        return reject(new Error(`statusCode=${resp.statusCode}`))
       }
 
-      let body = new Array<Uint8Array>()
+      const body = new Array<Uint8Array>()
       resp.on('data', chunk => body.push(chunk))
       resp.on('end', () => {
         let j
@@ -134,7 +135,7 @@ export async function send(webhook: string, data: any): Promise<void> {
         // otherwise it returns {"code":9499,"msg":"Bad Request","data":{}}.
         //
         // Ref https://github.com/megaease/easeprobe/blob/5b3a33c0eacafeffde0d38f9a65a0218468d5fb0/notify/lark/lark.go#L84
-        if (j.StatusCode == 0) {
+        if (j.StatusCode === 0) {
           resolve()
         } else {
           reject(j)
@@ -143,7 +144,7 @@ export async function send(webhook: string, data: any): Promise<void> {
     })
 
     req.on('error', err => reject(err))
-    req.write(JSON.stringify(data))
+    req.write(JSON.stringify(msg))
     req.end()
   })
 }

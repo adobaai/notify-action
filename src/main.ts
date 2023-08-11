@@ -22,14 +22,14 @@ async function run(): Promise<void> {
     )
     let cmdInfo: lark.Text, tpl: lark.CardTemplate
     try {
-      let {stdout, stderr} = await exec(cmd)
-      if (stderr == '') {
+      const {stdout, stderr} = await exec(cmd)
+      if (stderr === '') {
         tpl = lark.CardTemplate.Turquoise
         cmdInfo = new lark.Text(stdout)
       } else {
         tpl = lark.CardTemplate.Violet
         let text = ''
-        if (stdout != '') {
+        if (stdout !== '') {
           text = text.concat(`STDOUT:\n${stdout}\n\n`)
         }
         cmdInfo = new lark.Text(text.concat(`STDERR:\n${stderr}`))
@@ -38,7 +38,10 @@ async function run(): Promise<void> {
       tpl = lark.CardTemplate.Carmine
       cmdInfo = new lark.Text(`ERROR:\n${err}`)
     }
-    lark.send(webhook, new lark.Card(tpl, title).addElements(ciInfo, cmdInfo))
+    await lark.send(
+      webhook,
+      new lark.Card(tpl, title).addElements(ciInfo, cmdInfo).toMessage()
+    )
     core.setOutput('time', new Date().toTimeString())
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)

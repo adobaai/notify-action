@@ -5,7 +5,8 @@ import {exec} from './exec'
 
 async function run(): Promise<void> {
   try {
-    const title = core.getInput('title'),
+    const dryRun = core.getInput('dryRun'),
+      title = core.getInput('title'),
       cmd = core.getInput('command'),
       webhook = core.getInput('larkBotWebhook'),
       ctx = github.context,
@@ -31,7 +32,7 @@ async function run(): Promise<void> {
       commitURL = `${commitURL}/commits/${ctx.sha}`
     }
 
-    let ciInfo = `[CI](${actionURL}) of ${ownerRepo}/${ctx.ref}, see.`
+    let ciInfo = `[CI](${actionURL}) of ${ownerRepo}/${ctx.ref}, see`
     if (refType === 'pull') {
       ciInfo = ciInfo.concat(` [PR](${pullURL}),`)
     }
@@ -55,6 +56,13 @@ async function run(): Promise<void> {
       tpl = lark.CardTemplate.Carmine
       cmdInfo = `ERROR:\n${err}`
     }
+
+    if (dryRun) {
+      core.info(`CI info: ${ciInfo}`)
+      core.info(`Command info: ${cmdInfo}`)
+      return
+    }
+
     await lark.send(
       webhook,
       new lark.Card(tpl, title)

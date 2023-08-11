@@ -205,7 +205,7 @@ const exec_1 = __nccwpck_require__(7757);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const title = core.getInput('title'), cmd = core.getInput('command'), webhook = core.getInput('larkBotWebhook'), ctx = github.context, ownerRepo = `${ctx.repo.owner}/${ctx.repo.repo}`, repoURL = `https://github.com/${ownerRepo}`, actionURL = `${repoURL}/actions`;
+            const dryRun = core.getInput('dryRun'), title = core.getInput('title'), cmd = core.getInput('command'), webhook = core.getInput('larkBotWebhook'), ctx = github.context, ownerRepo = `${ctx.repo.owner}/${ctx.repo.repo}`, repoURL = `https://github.com/${ownerRepo}`, actionURL = `${repoURL}/actions`;
             // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
             core.debug(`Got command: ${cmd}`);
             let commitURL = `${repoURL}/commit/${ctx.sha}`, refType, pullURL;
@@ -222,7 +222,7 @@ function run() {
                 pullURL = `${repoURL}/pull/${matches === null || matches === void 0 ? void 0 : matches.at(1)}`;
                 commitURL = `${commitURL}/commits/${ctx.sha}`;
             }
-            let ciInfo = `[CI](${actionURL}) of ${ownerRepo}/${ctx.ref}, see.`;
+            let ciInfo = `[CI](${actionURL}) of ${ownerRepo}/${ctx.ref}, see`;
             if (refType === 'pull') {
                 ciInfo = ciInfo.concat(` [PR](${pullURL}),`);
             }
@@ -246,6 +246,11 @@ function run() {
             catch (err) {
                 tpl = lark.CardTemplate.Carmine;
                 cmdInfo = `ERROR:\n${err}`;
+            }
+            if (dryRun) {
+                core.info(`CI info: ${ciInfo}`);
+                core.info(`Command info: ${cmdInfo}`);
+                return;
             }
             yield lark.send(webhook, new lark.Card(tpl, title)
                 .addElements(new lark.Markdown(ciInfo), new lark.Text(cmdInfo))

@@ -2,6 +2,9 @@ name: 'Notify'
 description: 'Send notification to your destination'
 author: 'adobaai'
 inputs:
+  dryRun:
+    required: false
+    description: 'Dry run notifying or not'
   title:
     required: true
     description: 'The title of the nofification'

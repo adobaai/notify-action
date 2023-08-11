@@ -1,11 +1,16 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Notify'
+description: 'Send notification to your destination'
+author: 'adobaai'
 inputs:
-  milliseconds: # change this
+  title:
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+    description: 'The title of the nofification'
+  command:
+    required: true
+    description: 'The command to be executed'
+  larkBotWebhook:
+    required: true
+    description: 'The webhook url of the Lark bot'
 runs:
   using: 'node16'
   main: 'dist/index.js'

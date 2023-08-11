@@ -205,11 +205,10 @@ const exec_1 = __nccwpck_require__(7757);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const title = core.getInput('title'), cmd = core.getInput('command'), webhook = core.getInput('larkBotWebhook'), ctx = github.context, ownerRepo = `${ctx.repo.owner}/${ctx.repo.repo}`, repoURL = `https://github.com/${ownerRepo}`, actionURL = `${repoURL}/actions`, commitURL = `${repoURL}/commit/${ctx.sha}`;
+            const title = core.getInput('title'), cmd = core.getInput('command'), webhook = core.getInput('larkBotWebhook'), ctx = github.context, ownerRepo = `${ctx.repo.owner}/${ctx.repo.repo}`, repoURL = `https://github.com/${ownerRepo}`, actionURL = `${repoURL}/actions`;
             // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
             core.debug(`Got command: ${cmd}`);
-            let refType;
-            let pullURL;
+            let commitURL = `${repoURL}/commit/${ctx.sha}`, refType, pullURL;
             if (ctx.ref.startsWith('refs/heads/')) {
                 refType = 'branch';
             }
@@ -221,12 +220,13 @@ function run() {
                 const regex = new RegExp(`^refs/pull/(.+)/merge$`);
                 const matches = 'refs/pull/11/merge'.match(regex);
                 pullURL = `${repoURL}/pull/${matches === null || matches === void 0 ? void 0 : matches.at(1)}`;
+                commitURL = `${commitURL}/commits/${ctx.sha}`;
             }
             let ciInfo = `[CI](${actionURL}) of ${ownerRepo}/${ctx.ref}, see).`;
             if (refType === 'pull') {
                 ciInfo = ciInfo.concat(` [PR](${pullURL}),`);
             }
-            ciInfo = ciInfo.concat(` [commit](${commitURL}.`);
+            ciInfo = ciInfo.concat(` [commit](${commitURL}).`);
             let cmdInfo, tpl;
             try {
                 const { stdout, stderr } = yield (0, exec_1.exec)(cmd);

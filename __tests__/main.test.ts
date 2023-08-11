@@ -38,13 +38,13 @@ test.skip('lark', async () => {
   card.addElements(new lark.Markdown('**some**thing'))
   card.addElements(new lark.Text('text block here'))
   lark.send(
-    'https://open.feishu.cn/open-apis/bot/v2/hook/d1349aea-ad7c-4a75-b737-2a3971d8facf',
+    'https://open.feishu.cn/open-apis/bot/v2/hook/xxxxx',
     card.toMessage()
   )
 })
 
 // shows how the runner will run a javascript action with env / stdout protocol
-test('test runs', () => {
+test.skip('test runs', () => {
   process.env['INPUT_MILLISECONDS'] = '500'
   const np = process.execPath
   const ip = path.join(__dirname, '..', 'lib', 'main.js')

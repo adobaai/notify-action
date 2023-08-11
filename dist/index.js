@@ -102,10 +102,11 @@ class CardHeader {
 class Card {
     constructor(template, title) {
         this.header = new CardHeader(template, title);
-        this.elements = new Array();
+        this.elements = [];
     }
     addElements(...e) {
         this.elements.push(...e);
+        return this;
     }
     render() {
         var _a;
@@ -119,14 +120,14 @@ class Card {
     }
 }
 exports.Card = Card;
-function send(webhook, data) {
+function send(webhook, msg) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise(function (resolve, reject) {
             const req = (0, https_1.request)(webhook, { method: 'POST' }, resp => {
                 if (!resp.statusCode || resp.statusCode < 200 || resp.statusCode >= 300) {
-                    return reject(new Error('statusCode=' + resp.statusCode));
+                    return reject(new Error(`statusCode=${resp.statusCode}`));
                 }
-                let body = new Array();
+                const body = new Array();
                 resp.on('data', chunk => body.push(chunk));
                 resp.on('end', () => {
                     let j;
@@ -140,7 +141,7 @@ function send(webhook, data) {
                     // otherwise it returns {"code":9499,"msg":"Bad Request","data":{}}.
                     //
                     // Ref https://github.com/megaease/easeprobe/blob/5b3a33c0eacafeffde0d38f9a65a0218468d5fb0/notify/lark/lark.go#L84
-                    if (j.StatusCode == 0) {
+                    if (j.StatusCode === 0) {
                         resolve();
                     }
                     else {
@@ -149,7 +150,7 @@ function send(webhook, data) {
                 });
             });
             req.on('error', err => reject(err));
-            req.write(JSON.stringify(data));
+            req.write(JSON.stringify(msg));
             req.end();
         });
     });
@@ -210,15 +211,15 @@ function run() {
             const ciInfo = new lark.Markdown(`[CI](${actionURL}) of ${ownerRepo}/${ctx.ref}, see [commit](${commitURL}).`);
             let cmdInfo, tpl;
             try {
-                let { stdout, stderr } = yield (0, exec_1.exec)(cmd);
-                if (stderr == '') {
+                const { stdout, stderr } = yield (0, exec_1.exec)(cmd);
+                if (stderr === '') {
                     tpl = lark.CardTemplate.Turquoise;
                     cmdInfo = new lark.Text(stdout);
                 }
                 else {
                     tpl = lark.CardTemplate.Violet;
                     let text = '';
-                    if (stdout != '') {
+                    if (stdout !== '') {
                         text = text.concat(`STDOUT:\n${stdout}\n\n`);
                     }
                     cmdInfo = new lark.Text(text.concat(`STDERR:\n${stderr}`));
@@ -228,7 +229,7 @@ function run() {
                 tpl = lark.CardTemplate.Carmine;
                 cmdInfo = new lark.Text(`ERROR:\n${err}`);
             }
-            lark.send(webhook, new lark.Card(tpl, title).addElements(ciInfo, cmdInfo));
+            yield lark.send(webhook, new lark.Card(tpl, title).addElements(ciInfo, cmdInfo).toMessage());
             core.setOutput('time', new Date().toTimeString());
         }
         catch (error) {

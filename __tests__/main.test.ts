@@ -3,27 +3,29 @@ import * as lark from '../src/lark'
 import * as process from 'process'
 import * as cp from 'child_process'
 import * as path from 'path'
-import {expect, test} from '@jest/globals'
+import {expect, test, describe} from '@jest/globals'
 import {log} from 'console'
 
-test('exec echo', async () => {
-  const {stdout, stderr} = await exec('echo hello world')
-  expect(stdout).toEqual('hello world\n')
-  expect(stderr).toEqual('')
-})
+describe('exec', () => {
+  test('exec echo', async () => {
+    const {stdout, stderr} = await exec('echo hello world')
+    expect(stdout).toEqual('hello world\n')
+    expect(stderr).toEqual('')
+  })
 
-test('exec echo stderr', async () => {
-  const {stdout, stderr} = await exec('>&2 echo "so bad"')
-  expect(stdout).toEqual('')
-  expect(stderr).toEqual('so bad\n')
-})
+  test('exec echo stderr', async () => {
+    const {stdout, stderr} = await exec('>&2 echo "so bad"')
+    expect(stdout).toEqual('')
+    expect(stderr).toEqual('so bad\n')
+  })
 
-test('exec cat not found file', async () => {
-  try {
-    await exec('cat hello')
-  } catch (err) {
-    log('got err:', err)
-  }
+  test('exec cat not found file', async () => {
+    try {
+      await exec('cat hello')
+    } catch (err) {
+      log('got err:', err)
+    }
+  })
 })
 
 test('new url', async () => {
@@ -31,6 +33,12 @@ test('new url', async () => {
   expect(url.protocol).toEqual('https:')
   expect(url.host).toEqual('open.feishu.cn')
   expect(url.pathname).toEqual('/open-apis/bot/v2/hook/xxxx')
+})
+
+test('match', () => {
+  const regex = new RegExp(`^refs/pull/(.+)/merge$`)
+  const matches = 'refs/pull/11/merge'.match(regex)
+  expect(matches?.at(1)).toEqual('11')
 })
 
 test.skip('lark', async () => {

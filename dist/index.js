@@ -208,13 +208,31 @@ function run() {
             const title = core.getInput('title'), cmd = core.getInput('command'), webhook = core.getInput('larkBotWebhook'), ctx = github.context, ownerRepo = `${ctx.repo.owner}/${ctx.repo.repo}`, repoURL = `https://github.com/${ownerRepo}`, actionURL = `${repoURL}/actions`, commitURL = `${repoURL}/commit/${ctx.sha}`;
             // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
             core.debug(`Got command: ${cmd}`);
-            const ciInfo = new lark.Markdown(`[CI](${actionURL}) of ${ownerRepo}/${ctx.ref}, see [commit](${commitURL}).`);
+            let refType;
+            let pullURL;
+            if (ctx.ref.startsWith('refs/heads/')) {
+                refType = 'branch';
+            }
+            else if (ctx.ref.startsWith('refs/tags/')) {
+                refType = 'tag';
+            }
+            else if (ctx.ref.startsWith('refs/pull')) {
+                refType = 'pull';
+                const regex = new RegExp(`^refs/pull/(.+)/merge$`);
+                const matches = 'refs/pull/11/merge'.match(regex);
+                pullURL = `${repoURL}/pull/${matches === null || matches === void 0 ? void 0 : matches.at(1)}`;
+            }
+            let ciInfo = `[CI](${actionURL}) of ${ownerRepo}/${ctx.ref}, see).`;
+            if (refType === 'pull') {
+                ciInfo = ciInfo.concat(` [PR](${pullURL}),`);
+            }
+            ciInfo = ciInfo.concat(` [commit](${commitURL}.`);
             let cmdInfo, tpl;
             try {
                 const { stdout, stderr } = yield (0, exec_1.exec)(cmd);
                 if (stderr === '') {
                     tpl = lark.CardTemplate.Turquoise;
-                    cmdInfo = new lark.Text(stdout);
+                    cmdInfo = stdout;
                 }
                 else {
                     tpl = lark.CardTemplate.Violet;
@@ -222,14 +240,16 @@ function run() {
                     if (stdout !== '') {
                         text = text.concat(`STDOUT:\n${stdout}\n\n`);
                     }
-                    cmdInfo = new lark.Text(text.concat(`STDERR:\n${stderr}`));
+                    cmdInfo = text.concat(`STDERR:\n${stderr}`);
                 }
             }
             catch (err) {
                 tpl = lark.CardTemplate.Carmine;
-                cmdInfo = new lark.Text(`ERROR:\n${err}`);
+                cmdInfo = `ERROR:\n${err}`;
             }
-            yield lark.send(webhook, new lark.Card(tpl, title).addElements(ciInfo, cmdInfo).toMessage());
+            yield lark.send(webhook, new lark.Card(tpl, title)
+                .addElements(new lark.Markdown(ciInfo), new lark.Text(cmdInfo))
+                .toMessage());
             core.setOutput('time', new Date().toTimeString());
         }
         catch (error) {

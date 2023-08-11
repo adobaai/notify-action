@@ -222,7 +222,7 @@ function run() {
                 pullURL = `${repoURL}/pull/${matches === null || matches === void 0 ? void 0 : matches.at(1)}`;
                 commitURL = `${commitURL}/commits/${ctx.sha}`;
             }
-            let ciInfo = `[CI](${actionURL}) of ${ownerRepo}/${ctx.ref}, see).`;
+            let ciInfo = `[CI](${actionURL}) of ${ownerRepo}/${ctx.ref}, see.`;
             if (refType === 'pull') {
                 ciInfo = ciInfo.concat(` [PR](${pullURL}),`);
             }

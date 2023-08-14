@@ -22,5 +22,5 @@ jobs:
         with:
           dryRun: true
           title: 'hello world action'
-          command: 'git show --compact-summary'
+          command: 'git show -m --compact-summary'
           larkBotWebhook: ${{ secrets.LARK_BOT_WEBHOOK }}

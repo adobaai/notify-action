@@ -20,5 +20,5 @@ jobs:
       - uses: ./
         with:
           title: 'hello world action'
-          content: 'hello world'
+          content: 'git show -m --compact-summary'
           larkBotWebhook: ${{ secrets.LARK_BOT_WEBHOOK }}

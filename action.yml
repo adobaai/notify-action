@@ -7,10 +7,11 @@ inputs:
     description: 'Dry run notifying or not'
   title:
     required: true
-    description: 'The title of the nofification'
+    description: 'The title of the notification'
+  content:
+    description: 'The content of the notification (Markdown is supported)'
   command:
-    required: true
-    description: 'The command to be executed'
+    description: 'The command will be used as the content of the notification'
   larkBotWebhook:
     required: true
     description: 'The webhook url of the Lark bot'

@@ -32,7 +32,7 @@ class Message {
   }
 }
 
-interface Element {
+export interface Element {
   render(): object
 }
 

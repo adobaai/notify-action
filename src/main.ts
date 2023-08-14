@@ -7,6 +7,7 @@ async function run(): Promise<void> {
   try {
     const dryRun = core.getInput('dryRun'),
       title = core.getInput('title'),
+      content = core.getInput('content'),
       cmd = core.getInput('command'),
       webhook = core.getInput('larkBotWebhook'),
       ctx = github.context,
@@ -38,36 +39,39 @@ async function run(): Promise<void> {
     }
     ciInfo = ciInfo.concat(` [commit](${commitURL}).`)
 
-    let cmdInfo: string, tpl: lark.CardTemplate
-    try {
-      const {stdout, stderr} = await exec(cmd)
-      if (stderr === '') {
-        tpl = lark.CardTemplate.Turquoise
-        cmdInfo = stdout
-      } else {
-        tpl = lark.CardTemplate.Violet
-        let text = ''
-        if (stdout !== '') {
-          text = text.concat(`STDOUT:\n${stdout}\n\n`)
+    let cmdInfo = '',
+      tpl = lark.CardTemplate.Turquoise
+    if (cmd) {
+      try {
+        const {stdout, stderr} = await exec(cmd)
+        if (stderr === '') {
+          cmdInfo = stdout
+        } else {
+          tpl = lark.CardTemplate.Violet
+          let text = ''
+          if (stdout !== '') {
+            text = text.concat(`STDOUT:\n${stdout}\n\n`)
+          }
+          cmdInfo = text.concat(`STDERR:\n${stderr}`)
         }
-        cmdInfo = text.concat(`STDERR:\n${stderr}`)
+      } catch (err) {
+        tpl = lark.CardTemplate.Carmine
+        cmdInfo = `ERROR:\n${err}`
       }
-    } catch (err) {
-      tpl = lark.CardTemplate.Carmine
-      cmdInfo = `ERROR:\n${err}`
     }
-
     if (dryRun) {
       core.info(`CI info: ${ciInfo}`)
-      core.info(`Command info: ${cmdInfo}`)
+      if (content) core.info(`Content: ${content}`)
+      if (cmd) core.info(`Command: ${cmdInfo}`)
       return
     }
 
+    const elems: lark.Element[] = [new lark.Markdown(ciInfo)]
+    if (content) elems.push(new lark.Markdown(content))
+    if (cmd) elems.push(new lark.Text(cmdInfo))
     await lark.send(
       webhook,
-      new lark.Card(tpl, title)
-        .addElements(new lark.Markdown(ciInfo), new lark.Text(cmdInfo))
-        .toMessage()
+      new lark.Card(tpl, title).addElements(...elems).toMessage()
     )
     core.setOutput('time', new Date().toTimeString())
   } catch (error) {

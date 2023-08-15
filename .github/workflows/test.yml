@@ -19,7 +19,7 @@ jobs:
           fetch-depth: 2
       - uses: ./
         with:
-          title: 'hello world action'
-          content: 'hahahh'
+          title: 'Commit summary of notify-action'
+          content: 'Runner: ${{ runner.name }}'
           command: 'git show -m --compact-summary'
           larkBotWebhook: ${{ secrets.LARK_BOT_WEBHOOK }}

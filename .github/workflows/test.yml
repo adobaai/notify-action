@@ -1,10 +1,6 @@
 name: 'build-test'
 on: # rebuild any PRs and main branch changes
-  pull_request:
   push:
-    branches:
-      - main
-      - 'releases/*'
 
 jobs:
   build: # make sure build/ci work properly
@@ -19,6 +15,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
       - uses: ./
         with:
-          milliseconds: 1000
+          title: 'Commit summary of notify-action'
+          content: 'Runner: ${{ runner.name }}'
+          command: 'git show -m --compact-summary'
+          larkBotWebhook: ${{ secrets.LARK_BOT_WEBHOOK }}

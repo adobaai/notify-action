@@ -1,8 +1,8 @@
 {
-  "name": "typescript-action",
-  "version": "0.0.0",
+  "name": "notify-action",
+  "version": "0.1.0",
   "private": true,
-  "description": "TypeScript template action",
+  "description": "A GitHub action to send notifications",
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc",
@@ -25,11 +25,13 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.10.0"
+    "@actions/core": "^1.10.0",
+    "@actions/github": "^5.1.1"
   },
   "devDependencies": {
     "@types/node": "^20.4.9",
-    "@typescript-eslint/parser": "^5.62.0",
+    "@typescript-eslint/eslint-plugin": "^6.3.0",
+    "@typescript-eslint/parser": "^6.3.0",
     "@vercel/ncc": "^0.36.1",
     "eslint": "^8.46.0",
     "eslint-plugin-github": "^4.9.2",
